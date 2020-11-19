@@ -1,0 +1,12 @@
+*.backup
+*.log
+*.tf.json
+*.tfstate
+*.tfstate.backup
+*.yml
+*.zip
+.terraform.lock.hcl
+.terraform/
+__pycache__/
+config.json
+terraform/custodian/
