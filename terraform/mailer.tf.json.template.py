@@ -9,7 +9,7 @@ emit_tf({
     'resource': {
         'aws_sqs_queue': {
             'mailer': {
-                'name': 'cloud-custodian-mailer'
+                'name': 'cloud-custodian-mailer',
             }
         },
         'aws_ses_email_identity': {
@@ -67,7 +67,7 @@ emit_tf({
         },
         'aws_cloudwatch_log_group': {
             'mailer': {
-                'name': '/aws/lambda/cloud-custodian-mailer',
+                'name': '/aws/lambda/${aws_lambda_function.mailer.function_name}',
                 'retention_in_days': '30'
             }
         },
