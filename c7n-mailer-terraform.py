@@ -14,7 +14,7 @@ import c7n_mailer.deploy
 def write_c7n_mailer_archive(config: Path, destination: Path) -> None:
     args = argparse.Namespace(config=config.as_posix(), update_lambda=True)
     config = c7n_mailer.cli.get_and_validate_mailer_config(args)
-    templates_path = Path(c7n_mailer.cli.__file__).joinpath('msg-templates')
+    templates_path = Path(c7n_mailer.__file__).parent.joinpath('msg-templates')
     config['templates_folders'] = [templates_path.resolve().as_posix()]
     lambda_archive = c7n_mailer.deploy.get_archive(config)
     with destination.open('wb') as archive:
