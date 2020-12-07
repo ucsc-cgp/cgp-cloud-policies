@@ -98,6 +98,13 @@ $ pip install -r requirements.txt
 * On the first time running `make deploy`, you might be sent a verification
   email to the `admin_email` specified in config.json.
 
+* If you haven't already done so, you need to request production access to
+  Amazon SES in the region and account the mailer is deployed in to send email
+  to unverified addresses. (Alternatively, you can verify a domain.) Consult
+  the [Amazon SES documentation].
+
+  [Amazon SES documentation]: https://docs.aws.amazon.com/ses/latest/DeveloperGuide/request-production-access.html
+
 ### Install
 
 ```

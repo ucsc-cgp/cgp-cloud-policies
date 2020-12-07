@@ -75,13 +75,35 @@ emit_tf({
             'mailer': {
                 'function_name': 'cloud-custodian-mailer',  # hardcoded into c7n-mailer
                 'handler': 'periodic.dispatch',  # hardcoded into c7n-mailer
-                'runtime': 'python3.7',
                 'role': '${aws_iam_role.mailer.arn}',
+                'runtime': 'python3.7',
                 'filename': 'mailer.zip',
                 'source_code_hash': '${filebase64sha256("mailer.zip")}',
                 'description': 'mailer agent for cloud-custodian',
-                'timeout': '300'
+                'timeout': '30'
+            }
+        },
+        # TODO: use aws_lambda_event_source_mapping instead
+        'aws_cloudwatch_event_rule': {
+            'mailer': {
+                'schedule_expression': 'rate(5 minutes)',
+
+            }
+        },
+        'aws_cloudwatch_event_target': {
+            'mailer': {
+                'rule': '${aws_cloudwatch_event_rule.mailer.name}',
+                'arn': '${aws_lambda_function.mailer.arn}',
+            }
+        },
+        'aws_lambda_permission': {
+            'mailer': {
+                'action': 'lambda:InvokeFunction',
+                'function_name': '${aws_lambda_function.mailer.function_name}',
+                'principal': 'events.amazonaws.com',
+                'source_arn': '${aws_cloudwatch_event_rule.mailer.arn}'
             }
         }
     }
 })
+
