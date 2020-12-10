@@ -27,7 +27,6 @@ emit_yaml({
             'actions': [{
                 'type': 'notify',
                 'to': ['resource-owner', 'event-owner'],
-                'owner_absent_contact': [config.admin_email],
                 'template': 'default',
                 'subject': 'Untagged resource found',
                 'transport': {
