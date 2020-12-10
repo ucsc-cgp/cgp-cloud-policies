@@ -129,6 +129,7 @@ $ make report
 ### Uninstall
 
 ```
+$ make package
 $ make -C terraform destroy
 ```
 
