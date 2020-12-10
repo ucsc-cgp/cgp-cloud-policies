@@ -15,6 +15,8 @@ from pathlib import (
 import re
 import tempfile
 from typing import (
+    Any,
+    Mapping,
     Sequence,
     Tuple,
 )
@@ -30,10 +32,8 @@ from c7n.loader import (
 )
 import c7n.policy
 
-from template import (
-    JSON,
-)
 
+JSON = Mapping[str, Any]  # not correct, but close enough for now
 tf_vars = ['role_arn', 'lambda_suffix']
 
 

@@ -11,19 +11,10 @@ from typing import (
     Mapping,
     Optional,
     Sequence,
-    Union,
 )
 
 import yaml
 
-PrimitiveJSON = Union[str, int, float, bool, None]
-AnyJSON4 = Union[Mapping[str, Any], Sequence[Any], PrimitiveJSON]
-AnyJSON3 = Union[Mapping[str, AnyJSON4], Sequence[AnyJSON4], PrimitiveJSON]
-AnyJSON2 = Union[Mapping[str, AnyJSON3], Sequence[AnyJSON3], PrimitiveJSON]
-AnyJSON1 = Union[Mapping[str, AnyJSON2], Sequence[AnyJSON2], PrimitiveJSON]
-AnyJSON = Union[Mapping[str, AnyJSON1], Sequence[AnyJSON1], PrimitiveJSON]
-JSON = Mapping[str, AnyJSON]
-JSONs = Sequence[JSON]
 
 project_root = Path(__file__).parent.resolve()
 
