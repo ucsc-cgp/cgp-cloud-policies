@@ -56,65 +56,31 @@ emit_tf({
                 })
             }
         },
-        'aws_iam_service_linked_role': {
+        'aws_config_configuration_aggregator': {
             'config': {
-                'aws_service_name': 'config.amazonaws.com'
+                'name': 'account',
+                'account_aggregation_source': {
+                    'account_ids': ['${data.aws_caller_identity.current.account_id}'],
+                    'regions': '${var.aggregated_regions}'
+                }
+
             }
-        },
-        'aws_iam_role': {
-            'custodian': {
-                'name': 'cloud-custodian',
-                'assume_role_policy': json.dumps({
-                    'Version': '2012-10-17',
-                    'Statement': [
-                        {
-                            'Action': 'sts:AssumeRole',
-                            'Principal': {
-                                'Service': 'lambda.amazonaws.com'
-                            },
-                            'Effect': 'Allow',
-                            'Sid': ''
-                        }
-                    ]
-                })
-            }
-        },
-        'aws_iam_role_policy': {
-            'custodian': {
-                'name': 'cloud-custodian',
-                'role': '${aws_iam_role.custodian.id}',
-                'policy': json.dumps({
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Action": [
-                                "sqs:SendMessage"
-                            ],
-                            "Resource": "${aws_sqs_queue.mailer.arn}"
-                        },
-                        {
-                            'Effect': 'Allow',
-                            'Action': [
-                                'iam:ListAccountAliases'
-                            ],
-                            'Resource': '*'
-                        }
-                    ]
-                })
-            }
-        },
-        'aws_iam_role_policy_attachment': {
-            name: {
-                'role': '${aws_iam_role.custodian.name}',
-                'policy_arn': f'arn:aws:iam::aws:policy/service-role/{role}'
-            } for name, role in (('custodian_lambda', 'AWSLambdaBasicExecutionRole'),
-                                 ('custodian_config', 'AWSConfigRulesExecutionRole'))
         }
     },
     'data': {
         'aws_caller_identity': {
             'current': {}  # to expose data.aws_caller_identity.current.account_id
+        }
+    },
+    'variable': {
+        'aggregated_regions': {
+            'type': 'list',
+            'description': 'regions to aggregate in this account'
+        }
+    },
+    'output': {
+        'config_bucket': {
+            'value': '${aws_s3_bucket.config}'
         }
     }
 })

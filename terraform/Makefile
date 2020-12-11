@@ -7,7 +7,7 @@ include ../common.mk
 
 .PHONY: config
 config: $(patsubst %.template.py,%,$(wildcard *.tf.json.template.py))
-config: $(patsubst %.template.py,%,$(wildcard */*.tf.json.template.py))
+config: $(patsubst %.template.py,%,$(wildcard */*.tf.json.template.py))  # TODO
 
 .PHONY: init
 init: check_terraform config
@@ -40,8 +40,7 @@ auto_destroy: validate
 
 .PHONY: clean
 clean:
-	rm -f *.tf.json
-	rm -f config/*.tf.json
+	rm -f *.tf.json **/*.tf.json
 	rm -f *.zip
 	rm -rf custodian
 

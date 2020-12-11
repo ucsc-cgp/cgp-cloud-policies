@@ -1,11 +1,11 @@
 """
-Generates a Terraform module from cloud-custodian policy YAML. To use the
-module, two variables must be specified in the module block:
+Generates a Terraform module from cloud-custodian policy YAML.
 
-* role_arn: the ARN of the IAM role that the policy lambdas should assume, and
+If you reference a Terraform variable in your policy YAML, the Terraform module
+will be configured to expect it. Other variables are required; refer to the
+generated vars.tf file.
 
-* lambda_suffix: a suffix for each lambda name, used to prevent collisions if
-  using modules to deploy to multiple regions.
+The `local` and `aws` providers are required.
 """
 import argparse
 import json
@@ -33,8 +33,22 @@ from c7n.loader import (
 import c7n.policy
 
 
-JSON = Mapping[str, Any]  # not correct, but close enough for now
-tf_vars = ['role_arn', 'lambda_suffix']
+JSON = Mapping[str, Any]  # TODO: not correct, but close enough for now
+required_tf_vars = {
+    'role_arn': {
+        'type': 'string',
+        'description': 'ARN of the IAM role that the policy lambdas should assume'
+    },
+    'lambda_suffix': {
+        'type': 'string',
+        'description': 'suffix for each lambda name, used to prevent collisions'
+                       ' when deploying to multiple regions'
+    },
+    'deployment': {  # TODO: remove, find another way to reference
+        'type': 'string',
+        'description': 'a unique ID for each invocation of the module'
+    }
+}
 
 
 # TODO: mkdtemp pattern is messy
@@ -46,13 +60,23 @@ def generate_tf_from_config(config_file: Path, output_dir: Path) -> None:
     cloud-custodian config file to the specified output directory.
     """
     collection = PolicyLoader(Config.empty()).load_file(config_file)
+
     tf_config_files = []
+    user_vars = set()
     for policy in collection:
         tf_config_files.extend(generate_tf_from_policy(policy))
+        user_vars.update(find_terraform_vars(policy.data))
     for tf_config in tf_config_files:
         tf_config.replace(output_dir.joinpath(tf_config.name))
+
     # Variables can only be defined once per module
-    vars_tf = {'variable': {tf_var: {} for tf_var in tf_vars}}
+    user_vars = {var: {} for var in user_vars ^ set(required_tf_vars)}
+    vars_tf = {
+        'variable': {
+            **required_tf_vars,
+            **user_vars
+        }
+    }
     with output_dir.joinpath('vars.tf.json').open('w') as tf:
         json.dump(vars_tf, tf)
 
@@ -84,26 +108,15 @@ def render_config_rule_tf(policy: c7n.policy.Policy) -> JSON:
     policy_lambda = mu.PolicyLambda(policy)
     policy_lambda.arn = f'${{aws_lambda_function.{policy.name}.arn}}'
     config_rule = policy_lambda.get_events(None).pop()
-    properties = config_rule.get_rule_params(policy_lambda)
-    # TODO: Use convert_keys_to_snake_case here
+    raw_properties = config_rule.get_rule_params(policy_lambda)
+    config_properties = convert_keys_to_snake_case(raw_properties)
+    config_properties['name'] = config_properties.pop('config_rule_name')
+    config_properties['source']['source_detail'] = config_properties['source'].pop('source_details')
     return {
         'resource': {
             'aws_config_config_rule': {
                 policy.name: {
-                    'name': properties['ConfigRuleName'],
-                    'description': properties['Description'],
-                    **conditional_key_val(properties, 'InputParameters'),
-                    **conditional_key_val(properties, 'MaximumExecutionFrequency'),
-                    'scope': convert_keys_to_snake_case(properties['Scope']),
-                    'source': {
-                        'owner': properties['Source']['Owner'],
-                        'source_identifier': f'${{aws_lambda_function.{policy.name}.arn}}',
-                        'source_detail': {
-                            'event_source': 'aws.config',
-                            'message_type': 'ConfigurationItemChangeNotification'
-                        }
-                    },
-                    **conditional_key_val(properties, 'tags'),
+                    **config_properties,
                     'depends_on': [f'aws_lambda_permission.{policy.name}']
                 }
             },
@@ -121,23 +134,50 @@ def render_config_rule_tf(policy: c7n.policy.Policy) -> JSON:
 def _render_lambda(policy: c7n.policy.Policy) -> Tuple[JSON, Path]:
     policy_lambda = mu.PolicyLambda(policy)
 
+    # TODO: Find a saner way to manage per-account config
+    # cloud-custodian Lambda configuration is packaged with the lambda itself
+    # (instead of using something, like, you know, environment variables) so to
+    # use Terraform interpolations that change per account (which happens if
+    # we're using module-scoped variables) we need to get a little messy:
+    # 1. Copy the generated archive to the module directory. The archive
+    #    contains the lambda code and config.json, which contains the
+    #    interpolations we're interested in.
     archive_path = Path(tempfile.mkdtemp()).joinpath(f'{policy.name}.zip')
     with archive_path.open('wb') as archive:
         archive.write(policy_lambda.get_archive().get_bytes())
+    # 2. Duplicate config.json in memory (see c7n.mu.PolicyLambda.get_archive())
+    #    then inline it into the Terraform JSON as a local_file to eval
+    #    interpolations then write to disk when we `terraform apply`
+    config_json = json.dumps({
+        'execution-options': mu.get_exec_options(policy_lambda.policy.options),
+        'policies': [policy_lambda.policy.data]
+    }, indent=4)
+    # 3. In the Terraform JSON, use local-exec to combine the config.json (with
+    #    evaluated interpolations) with the archive, and upload that.
+    workdir = f'${{var.deployment}}/{policy.name}'
+    new_archive_path = workdir + f'/{policy.name}.zip'
+    commands = [
+        f'mkdir -p {workdir}',
+        f'cp {policy.name}.zip {new_archive_path}',
+        f'cd {workdir}',
+        f'zip {policy.name}.zip config.json'
+    ]
 
     properties = policy_lambda.get_config()
-    tf_config = dict(convert_keys_to_snake_case(properties))
+    tf_config = convert_keys_to_snake_case(properties)
     tf_config['kms_key_arn'] = tf_config.pop('k_m_s_key_arn', '')
     tf_config['function_name'] = f'{tf_config["function_name"]}${{var.lambda_suffix}}'
-    filename = f'${{path.module}}/{policy.name}.zip'
-
     lambda_tf = {
         'resource': {
             'aws_lambda_function': {
                 policy.name: {
                     **tf_config,
-                    'filename': filename,
-                    'source_code_hash': f'${{filebase64sha256("{filename}")}}'
+                    'filename': f'${{path.module}}/{new_archive_path}',
+                    'source_code_hash': f'${{filesha256("${{path.module}}/{policy.name}.zip")}}',
+                    'depends_on': [
+                        f'local_file.{policy.name}',
+                        f'aws_cloudwatch_log_group.{policy.name}'
+                    ]
                 }
             },
             'aws_cloudwatch_log_group': {
@@ -146,7 +186,19 @@ def _render_lambda(policy: c7n.policy.Policy) -> Tuple[JSON, Path]:
                     'retention_in_days': '30'
                 }
             },
-        }
+            'local_file': {
+                policy.name: {
+                    'content': config_json,
+                    'filename': f'${{path.module}}/{workdir}/config.json',
+                    'provisioner': {
+                        'local-exec': {
+                            'command': ' && '.join(commands),
+                            'working_dir': '${path.module}'
+                        }
+                    }
+                }
+            }
+        },
     }
     return lambda_tf, archive_path.resolve()
 
@@ -159,7 +211,7 @@ mode_dispatch = {
 def merge_tf(tf_config_1: JSON, tf_config_2: JSON) -> JSON:
     return {
         key: tf_config_1.get(key, {}) | tf_config_2.get(key, {})
-        for key in tf_config_1 | tf_config_2
+        for key in set(tf_config_1) | set(tf_config_2)
     }
 
 
@@ -175,24 +227,20 @@ def conditional_key_val(obj: JSON, key: str) -> JSON:
     {}
     """
     try:
-        return {convert_camel_to_snake(key): obj[key]}
+        return {convert_camel_case_to_snake_case(key): obj[key]}
     except KeyError:
         return {}
 
 
-def convert_camel_to_snake(camel_case: str) -> str:
+def convert_camel_case_to_snake_case(camel_case: str) -> str:
     """
-    >>> convert_camel_to_snake('FooBarBaz')
+    >>> convert_camel_case_to_snake_case('FooBarBaz')
     'foo_bar_baz'
     """
-    if isinstance(camel_case, str):
-        return re.sub(r'(?<!^)(?=[A-Z])', '_', camel_case).lower()
-    else:
-        return camel_case
+    return re.sub(r'(?<!^)(?=[A-Z])', '_', camel_case).lower()
 
 
-# TODO: Rename this to be more appropriate
-def convert_keys_to_snake_case(camel_case: JSON) -> JSON:
+def convert_keys_to_snake_case(camel_case):
     """
     >>> convert_keys_to_snake_case({'FooBarBaz': 123})
     {'foo_bar_baz': 123}
@@ -202,11 +250,38 @@ def convert_keys_to_snake_case(camel_case: JSON) -> JSON:
     """
     if isinstance(camel_case, dict):
         return {
-            convert_camel_to_snake(k): convert_keys_to_snake_case(v)
-            for k, v in camel_case.items() if convert_keys_to_snake_case(v)
+            convert_camel_case_to_snake_case(k): convert_keys_to_snake_case(v)
+            for k, v in camel_case.items() if convert_keys_to_snake_case(v)  # TODO
         }
+    elif isinstance(camel_case, list):
+        return [convert_keys_to_snake_case(item) for item in camel_case]
     else:
         return camel_case
+
+
+def find_terraform_vars(config) -> set[str]:
+    """
+    >>> find_terraform_vars({
+    ...     'foo': {'bar': '${var.foo}'},
+    ...     'baz': '${var.three.bar}',
+    ...     'qux': 'var.two.bar'
+    ... })
+    {'three', 'foo'}
+    """
+    variables = set()
+    if isinstance(config, dict):
+        for values in config.values():
+            variables.update(find_terraform_vars(values))
+    elif isinstance(config, list):
+        for value in config:
+            variables.update(find_terraform_vars(value))
+    elif isinstance(config, str):
+        matches = re.finditer(r'\${var\.(\w+)(\w|\.)*}', config)
+        variables = set(match.group(1) for match in matches)
+    else:
+        raise RuntimeError
+
+    return variables
 
 
 if __name__ == '__main__':

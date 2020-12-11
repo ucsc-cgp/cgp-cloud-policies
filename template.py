@@ -1,3 +1,4 @@
+import dataclasses
 import functools
 import json
 from pathlib import (
@@ -59,7 +60,7 @@ class Terraform:
                              stdout=subprocess.PIPE,
                              text=True,
                              shell=False)
-        return cmd.stdout
+        return cmd.stdout.decode()
 
     @functools.cached_property
     def state(self) -> Mapping[str, Any]:
@@ -93,6 +94,35 @@ class Terraform:
 terraform = Terraform(project_root.joinpath('terraform'))
 
 
+@dataclasses.dataclass
+class Account:
+    role_arn: str
+    name: str
+    regions: Sequence[str]
+    primary_region: str
+    primary: bool = False
+
+    def module_name(self, module: str) -> str:
+        return config.module_name(module, self.name)
+
+
+@dataclasses.dataclass
+class Deployment:
+    region: str
+    account: Account
+
+    @property
+    def name(self) -> str:
+        return f'{self.account.name}_{self.region}'
+
+    @property
+    def primary(self) -> bool:
+        return self.region == self.account.primary_region
+
+    def module_name(self, module: str) -> str:
+        return config.module_name(module, self.name)
+
+
 class Config:
 
     def __init__(self, config_file: Path):
@@ -104,12 +134,52 @@ class Config:
         return self._config['admin_email']
 
     @property
-    def admin_region(self) -> str:
-        return self._config['admin_region']
+    def aws_accounts(self) -> Sequence[Account]:
+        return [
+            Account(**{  # as dict to prevent passing same arg multiple times
+                'name': account_name,
+                **self._config['aws']['defaults'],
+                **account
+            })
+            for account_name, account in self._config['aws']['accounts'].items()
+        ]
 
     @property
-    def aws_accounts(self) -> JSON:
-        return self._config['aws']
+    def aws_deployments(self) -> Sequence[Deployment]:
+        return [
+            Deployment(region=region, account=account)
+            for account in self.aws_accounts
+            for region in account.regions
+        ]
+
+    @property
+    def aws_primary_deployments(self) -> Sequence[Deployment]:
+        return [
+            deployment
+            for deployment in self.aws_deployments
+            if deployment.region == deployment.account.primary_region
+        ]
+
+    @property
+    def aws_primary_deployment(self) -> Deployment:
+        primary_deployments = [
+            primary_deployment
+            for primary_deployment in self.aws_primary_deployments
+            if primary_deployment.account.primary
+        ]
+        assert len(primary_deployments) == 1, 'Exactly one primary account required'
+        return primary_deployments[0]
+
+    @property
+    def aws_provider_access_key(self) -> str:
+        return self._config['aws']['provider']['access_key']
+
+    @property
+    def aws_provider_secret_key(self) -> str:
+        return self._config['aws']['provider']['secret_key']
+
+    def module_name(self, module: str, deployment: str) -> str:
+        return f'{module}_{deployment}'
 
 
 config = Config(project_root.joinpath('config.json'))

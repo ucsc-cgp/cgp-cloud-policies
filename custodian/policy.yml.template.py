@@ -3,7 +3,6 @@ import os
 from template import (
     config,
     emit_yaml,
-    terraform,
 )
 
 managed_resource_types = [
@@ -19,7 +18,7 @@ emit_yaml({
             'resource': resource_type,
             'mode': {
                 'type': 'config-rule',
-                'role': terraform.get_attribute('aws_iam_role.custodian', 'arn', '${var.role_arn}')
+                'role': '${var.role_arn}'
             } if 'REPORT_ONLY' not in os.environ else {
                 'type': 'pull'
             },
@@ -31,10 +30,9 @@ emit_yaml({
                 'subject': 'Untagged resource found',
                 'transport': {
                     'type': 'sqs',
-                    'queue': terraform.get_attribute('aws_sqs_queue.mailer', 'arn')
+                    'queue': '${var.mailer.arn}'
                 }
             }],
         } for resource_type in managed_resource_types
     ]
 })
-

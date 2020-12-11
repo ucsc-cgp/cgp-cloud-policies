@@ -9,16 +9,27 @@ emit_tf({
             'aws': {
                 'source': 'hashicorp/aws',
                 'version': '~> 3.0'
-            }
+            },
+            'local': {},
+            'time': {}
         }
     },
     'provider': {
         'aws': [{
-            'region': config.admin_region
+            'secret_key': config.aws_provider_secret_key,
+            'access_key': config.aws_provider_access_key,
+            'region': config.aws_primary_deployment.region,
+            'assume_role': {
+                'role_arn': config.aws_primary_deployment.account.role_arn
+            }
         }] + [{
-            'alias': region,
-            'region': region
-        } for region in ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']]
-        # TODO: Use config
+            'secret_key': config.aws_provider_secret_key,
+            'access_key': config.aws_provider_access_key,
+            'region': deployment.region,
+            'assume_role': {
+                'role_arn': deployment.account.role_arn
+            },
+            'alias': deployment.name
+        } for deployment in config.aws_deployments]
     }
 })

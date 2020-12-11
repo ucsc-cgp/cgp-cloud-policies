@@ -5,25 +5,43 @@ from template import (
 
 emit_tf({
     'module': {
-        **{f'custodian-{region}': {
-            'source': './custodian',
-            'role_arn': '${aws_iam_role.custodian.arn}',
-            'lambda_suffix': f'-{region}',
-            'providers': {
-                'aws': f'aws.{region}'
-            },
-            'depends_on': [f'module.config-{region}']
-        } for region in ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']},
-        # TODO: Use config
-        **{f'config-{region}': {
-            'source': './config',
-            'region': region,
-            'include_global': region == config.admin_region,
-            'config_role': '${aws_iam_service_linked_role.config}',
-            's3_bucket': '${aws_s3_bucket.config}',
-            'providers': {
-                'aws': f'aws.{region}'
+        **{
+            deployment.module_name('custodian'): {
+                'source': './custodian',
+                'role_arn': f"${{module.{deployment.account.module_name('config')}.role.arn}}",
+                'lambda_suffix': f'-{deployment.region}',
+                'deployment': deployment.name,
+                'mailer': '${aws_sqs_queue.mailer}',
+                'providers': {
+                    'aws': f'aws.{deployment.name}'
+                },
+                'depends_on': [f"module.{deployment.module_name('config')}"]
             }
-        } for region in ['us-east-1', 'us-east-2', 'us-west-1', 'us-west-2']}
+            for deployment in config.aws_deployments
+        },
+        **{
+            deployment.account.module_name('config'): {
+                'source': './per-account',
+                'mailer_arn': '${aws_sqs_queue.mailer.arn}',
+                'aggregated_regions': deployment.account.regions,
+                'providers': {
+                    'aws': f'aws.{deployment.name}'
+                }
+            }
+            for deployment in config.aws_primary_deployments
+        },
+        **{
+            deployment.module_name('config'): {
+                'source': './per-deployment',
+                'region': deployment.region,
+                'include_global': deployment.primary,
+                'config_role_arn': f"${{module.{deployment.account.module_name('config')}.service_linked_role.arn}}",
+                's3_bucket_name': f"${{module.{deployment.account.module_name('config')}.config_bucket.id}}",
+                'providers': {
+                    'aws': f'aws.{deployment.name}'
+                }
+            }
+            for deployment in config.aws_deployments
+        }
     }
 })

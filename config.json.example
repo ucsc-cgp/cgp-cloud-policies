@@ -1,0 +1,36 @@
+{
+    // Notification emails are sent from here
+    "admin_email": "admin@example.com",
+    "aws": {
+        "accounts": {
+            "example1": {
+                // Terraform assumes this role to create resources
+                "role_arn": "...",
+                // Only one account can be the primary. Mailer is deployed here
+                "primary": true,
+                "primary_region": "us-west-2"
+            },
+            "example2": {
+                "role_arn": "..."
+            },
+            "example3": {
+                "role_arn": "..."
+            }
+        },
+        "defaults": {
+            // AWS Config account configuration aggregators live here
+            "primary_region": "us-east-1",
+            // Policies deployed to all specified regions
+            "regions": [
+                "us-east-1",
+                "us-east-2",
+                "us-west-1",
+                "us-west-2"
+            ]
+        },
+        "provider": {
+            "access_key": "...",
+            "secret_key": "..."
+        }
+    }
+}

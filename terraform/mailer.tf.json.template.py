@@ -12,6 +12,36 @@ emit_tf({
                 'name': 'cloud-custodian-mailer',
             }
         },
+        # TODO: https://github.com/hashicorp/terraform-provider-aws/issues/13980
+        # aws_sqs_queue_policy needs to wait up to 60s after aws_sqs_queue creation
+        'time_sleep': {
+            'mailer': {
+                'create_duration': '60s',
+                'depends_on': ['aws_sqs_queue.mailer']
+            }
+        },
+        'aws_sqs_queue_policy': {
+            'mailer': {
+                'queue_url': '${aws_sqs_queue.mailer.id}',
+                'policy': json.dumps({
+                    'Version': '2012-10-17',
+                    'Id': 'CrossAccountAccess',
+                    'Statement': [{
+                        'Sid': 'AuthorizedRoles',
+                        'Effect': 'Allow',
+                        'Principal': {
+                            'AWS': [
+                                f'${{module.{account.module_name("config")}.role.arn}}'
+                                for account in config.aws_accounts
+                            ]
+                        },
+                        'Action': ['sqs:SendMessage'],
+                        'Resource': '${aws_sqs_queue.mailer.arn}'
+                    }]
+                }),
+                'depends_on': ['time_sleep.mailer']
+            }
+        },
         'aws_ses_email_identity': {
             'mailer': {
                 'email': config.admin_email
@@ -106,4 +136,3 @@ emit_tf({
         }
     }
 })
-

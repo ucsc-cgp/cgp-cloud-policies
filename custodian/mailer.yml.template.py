@@ -9,5 +9,5 @@ emit_yaml({
     'role': terraform.get_attribute('aws_iam_role.mailer', 'arn'),
     'runtime': terraform.get_attribute('aws_lambda_function.mailer', 'runtime'),
     'from_address': config.admin_email,
-    'region': config.admin_region  # defaults to us-east-1 if not set explicitly
+    'region': config.aws_primary_deployment.region
 })
