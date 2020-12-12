@@ -3,9 +3,9 @@ include ./common.mk
 package:
 	$(MAKE) -C custodian policy.yml
 	mkdir -p terraform/custodian/
-	python c7n-terraform.py -c custodian/policy.yml -o terraform/custodian
+	python scripts/c7n-terraform.py -c custodian/policy.yml -o terraform/custodian
 	$(MAKE) -C custodian mailer.yml
-	python c7n-mailer-terraform.py -c custodian/mailer.yml -o terraform/mailer.zip
+	python scripts/c7n-mailer-terraform.py -c custodian/mailer.yml -o terraform/mailer.zip
 
 deploy:
 	$(MAKE) -C terraform apply

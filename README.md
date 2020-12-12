@@ -39,7 +39,7 @@ deploy those policies to AWS. At a high level:
   that can be deployed by Terraform. (See `make package`.)
 
   [custodian/policy.yml]: custodian/policy.yml
-  [c7n-terraform.py]: c7n-terraform.py
+  [c7n-terraform.py]: scripts/c7n-terraform.py
 
 * The policy-specific resources, in addition to the other resources needed to
   make everything run, are defined in [terraform/] and can be deployed together.
@@ -217,7 +217,7 @@ able to avoid the second `make package deploy`.
 
 See also cloud-custodian/cloud-custodian#3482.
 
-  [c7n-mailer-terraform.py]: c7n-mailer-terraform.py
+  [c7n-mailer-terraform.py]: scripts/c7n-mailer-terraform.py
 
 ### cloud-custodian has no native Terraform support
 
