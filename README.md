@@ -54,8 +54,7 @@ deploy those policies to AWS. At a high level:
 
   [template.py]: template.py
 
-Email notifications are handled by c7n-mailer. It is deployed in a similar
-fashion.
+Email notifications are handled by c7n-mailer. It is deployed similarly.
 
 ### Multi-account and multi-region
 
@@ -165,11 +164,13 @@ $ make package deploy
 
 Policies are enforced automatically. Alternatively, you can manually run
 cloud-custodian against the current AWS account to generate JSON of all
-noncompliant resources:
+noncompliant resources in the primary account:
 
 ```
 $ make report
 ```
+
+Note that running `make report` may execute specified policy remediations.
 
 ### Uninstall
 
