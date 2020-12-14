@@ -1,7 +1,6 @@
 import os
 
 from template import (
-    config,
     emit_yaml,
 )
 
