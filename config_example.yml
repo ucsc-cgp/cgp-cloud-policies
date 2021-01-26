@@ -18,19 +18,19 @@ aws:
     - "us-west-1"
     - "us-west-2"
 
-  # The role custodian will be assuming to deploy resources
+  # The role Terraform will be creating, and custodian will be assuming to deploy resources
   IAM_role_name: "cloud_enforcer_role"
 
-  # The policy that gives IAM_role_name sufficient privileges
+  # The policy that Terraform will be creating, and gives IAM_role_name sufficient privileges
   IAM_policiy_name: "cloud_enforcer_policy"
 
-  # The policy prefix for custodian resources, the suffix will be the resource type, defined in aws.resources
+  # The policy prefix for custodian resources, the suffix will be the resource type, defined in aws.resources (such as s3/ec2/ebs)
   custodian_policy_prefix: "cloud_enforcer_"
 
   # The resources that the custodian policies will be watching, each resource listed below requires its own policy
   # until further progress is made on https://github.com/cloud-custodian/cloud-custodian/issues/1244
   resources:
-    - "AWS.s3"
+    - "s3"
 
   # AWS access and secret key used to deploy the IAM roles via Terraform. These credentials must be associated
   # to a user/role with sufficient privileges to deploy IAM roles defined in the /terraform/ directory
