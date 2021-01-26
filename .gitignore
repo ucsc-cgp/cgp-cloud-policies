@@ -7,5 +7,5 @@
 .terraform.lock.hcl
 .terraform/
 __pycache__/
-*config.json*
-*config.yml*
+config.json
+config.yml
