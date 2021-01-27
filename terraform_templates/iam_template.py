@@ -47,7 +47,7 @@ def __iam_role_resource(config: Mapping) -> Mapping:
                             "Action": "sts:AssumeRole",
                             "Condition": {}
                         },
-                        {
+                        {  # we need to allow AWS Lambda to use this role, as this is how the custodian policies will take actions
                             "Effect": "Allow",
                             "Principal": {
                                 "Service": "lambda.amazonaws.com"
