@@ -1,6 +1,9 @@
 # All the necessary information to deploy to AWS
 aws:
 
+  #####################################################################################################
+  ##### Common config changes (start) - This is the only area you will most likely need to change #####
+
   # The accounts we will be deploying resources to. Each account will have an IAM policy and role created, in addition
   # to an AWS config rule created in EACH region specified under aws.regions
   accounts:
@@ -8,6 +11,18 @@ aws:
       account_id: "1234567890"
     - account_name: "my-account-2"
       account_id: "0987654321"
+
+  # AWS access and secret key used to deploy the IAM roles via Terraform. These credentials must be associated
+  # to a user/role with sufficient privileges to deploy IAM roles defined in the /terraform_templates/ directory
+  provider:
+    access_key: "1234"
+    secret_key: "5678"
+
+    # This will be provider of permissions that Terraform will use to deploy the new IAM policy and roles
+    principal: "arn:aws:iam::123456789:user/MyUser"
+
+  #####                             Common config changes (end)                                   #####
+  #####################################################################################################
 
   # These are the regions that we will be deploying resources in. Every account in aws.accounts will have policies created
   # in EACH region noted below.
@@ -22,7 +37,7 @@ aws:
   IAM_role_name: "cloud_enforcer_role"
 
   # The policy that Terraform will be creating, and gives IAM_role_name sufficient privileges
-  IAM_policiy_name: "cloud_enforcer_policy"
+  IAM_policy_name: "cloud_enforcer_policy"
 
   # The policy prefix for custodian resources, the suffix will be the resource type, defined in aws.resources (such as s3/ec2/ebs)
   custodian_policy_prefix: "mandatory_tag_enforcer_"
@@ -31,9 +46,3 @@ aws:
   # until further progress is made on https://github.com/cloud-custodian/cloud-custodian/issues/1244
   resources:
     - "s3"
-
-  # AWS access and secret key used to deploy the IAM roles via Terraform. These credentials must be associated
-  # to a user/role with sufficient privileges to deploy IAM roles defined in the /terraform_templates/ directory
-  provider:
-    access_key: "1234"
-    secret_key: "5678"
