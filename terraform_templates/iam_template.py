@@ -42,6 +42,14 @@ def __iam_role_resource(config: Mapping) -> Mapping:
                             },
                             "Action": "sts:AssumeRole",
                             "Condition": {}
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRole",
+                            "Condition": {}
                         }
                     ]
                 }
