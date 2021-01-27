@@ -48,3 +48,28 @@ def __iam_role_resource(config: Mapping) -> Mapping:
     }
 
     return dict_template
+
+
+def __iam_policy_resource(config: Mapping) -> Mapping:
+    dict_template = {
+        "aws_iam_policy": {
+            config["aws"]["IAM_policy_name"]: {
+                "name": config["aws"]["IAM_policy_name"],
+                "description": "The policy that will give the IAM role permissions to deploy custodian resources",
+                "policy": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Action": [
+                                "*"
+                            ],
+                            "resource": "*",
+                            "Effect": "Allow"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+    return dict_template
