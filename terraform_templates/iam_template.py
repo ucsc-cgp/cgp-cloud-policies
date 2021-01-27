@@ -19,7 +19,11 @@ def terraform_iam_template(config: Mapping) -> Mapping:
                 "region": config["aws"]["primary_region"]
             }
         },
-        "resource": __iam_role_resource(config)
+        "resource": [
+            __iam_role_resource(config),
+            __iam_policy_resource(config),
+            __iam_role_policy_attachment(config)
+        ]
     }
 
     return dict_template
