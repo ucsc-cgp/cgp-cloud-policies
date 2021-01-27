@@ -1,6 +1,7 @@
 from typing import Mapping
 
 
+# Creates a dictionary that specifies how Terraform should deploy IAM roles and policies
 def terraform_iam_template(config: Mapping) -> Mapping:
     dict_template = {
         "terraform": {
@@ -24,6 +25,7 @@ def terraform_iam_template(config: Mapping) -> Mapping:
     return dict_template
 
 
+# Creates the IAM role that will be deployed
 def __iam_role_resource(config: Mapping) -> Mapping:
     dict_template = {
         "aws_iam_role": {
@@ -50,6 +52,7 @@ def __iam_role_resource(config: Mapping) -> Mapping:
     return dict_template
 
 
+# Creates the IAM policy that will give the role permissions
 def __iam_policy_resource(config: Mapping) -> Mapping:
     dict_template = {
         "aws_iam_policy": {
@@ -68,6 +71,20 @@ def __iam_policy_resource(config: Mapping) -> Mapping:
                         }
                     ]
                 }
+            }
+        }
+    }
+
+    return dict_template
+
+
+# Attaches the above roles and policies
+def __iam_role_policy_attachment(config: Mapping) -> Mapping:
+    dict_template = {
+        "aws_iam_role_policy_attachment": {
+            "attach": {
+                "role": "aws_iam_role." + config["aws"]["IAM_role_name"] + ".name",
+                "policy_arn": "aws_iam_policy." + config["aws"]["IAM_policy_name"] + ".arn"
             }
         }
     }
