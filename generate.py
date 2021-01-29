@@ -14,7 +14,7 @@ class Generator:
 
         # load the config file
         with open(self.config_path) as file:
-            self.config: Mapping = yaml.load(file)
+            self.config: Mapping = yaml.load(file, Loader=yaml.FullLoader)
 
     # Generates the config file used by c7n-org, which specifies all the accounts, regions, and roles we will use to deploy policies
     def generate_custodian_config(self):
@@ -22,7 +22,7 @@ class Generator:
 
     # Generates the policy file that will be deployed as a resource using custodian
     def generate_custodian_policy(self):
-        raise NotImplementedError()
+        return policy_template.custodian_policy_template(self.config)
 
     # Generates the terraform file that will deploy the IAM roles and policies needed by custodian
     def generate_terraform(self):
