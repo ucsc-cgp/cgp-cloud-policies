@@ -11,7 +11,6 @@ aws:
 
   # These are the regions that we will be deploying resources in. Every account in aws.accounts will have policies created
   # in EACH region noted below.
-  primary_region: "us-east-1"
   regions:
     - "us-east-1"
     - "us-east-2"
@@ -22,7 +21,7 @@ aws:
   IAM_role_name: "cloud_enforcer_role"
 
   # The policy that Terraform will be creating, and gives IAM_role_name sufficient privileges
-  IAM_policiy_name: "cloud_enforcer_policy"
+  IAM_policy_name: "cloud_enforcer_policy"
 
   # The policy prefix for custodian resources, the suffix will be the resource type, defined in aws.resources (such as s3/ec2/ebs)
   custodian_policy_prefix: "mandatory_tag_enforcer_"
@@ -35,5 +34,6 @@ aws:
   # AWS access and secret key used to deploy the IAM roles via Terraform. These credentials must be associated
   # to a user/role with sufficient privileges to deploy IAM roles defined in the /terraform_templates/ directory
   provider:
-    access_key: "1234"
-    secret_key: "5678"
+    region: "us-east-1"
+    shared_credentials_file: "/path/to/.aws/credentials"
+    profile: "myProfileName"
