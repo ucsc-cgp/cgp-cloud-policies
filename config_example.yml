@@ -29,7 +29,7 @@ aws:
   # The resources that the custodian policies will be watching, each resource listed below requires its own policy resource
   # until further progress is made on https://github.com/cloud-custodian/cloud-custodian/issues/1244
   resources:
-    - "s3"
+    - "aws.s3"
 
   # AWS access and secret key used to deploy the IAM roles via Terraform. These credentials must be associated
   # to a user/role with sufficient privileges to deploy IAM roles defined in the /terraform_templates/ directory
