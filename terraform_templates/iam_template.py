@@ -7,15 +7,15 @@ def terraform_iam_template(config: Mapping):
             "required_providers": {
                 "aws": {
                     "source": "hashicorp/aws",
-                    "version": "~> 3.00"
+                    "version": "3.00"
                 }
             }
         },
         "provider": {
             "aws": {
-                "access_key": config["aws"]["provider"]["access_key"],
-                "secret_key": config["aws"]["provider"]["secret_key"],
-                "region": config["aws"]["primary_region"]
+                "region": config["aws"]["provider"]["region"],
+                "shared_credentials_file": config["aws"]["provider"]["shared_credentials_file"],
+                "profile": config["aws"]["provider"]["profile"],
             }
         }
     }
