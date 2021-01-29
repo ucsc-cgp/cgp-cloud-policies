@@ -1,6 +1,7 @@
 import yaml
 from typing import Mapping
 from terraform_templates import iam_template
+from custodian_templates import config_template, policy_template
 
 
 # generates all the necessary files to deploy policies given a configuration file in the format specified in /config.yml.template
@@ -17,7 +18,7 @@ class Generator:
 
     # Generates the config file used by c7n-org, which specifies all the accounts, regions, and roles we will use to deploy policies
     def generate_custodian_config(self):
-        raise NotImplementedError()
+        return config_template.custodian_organizations_config_template(self.config)
 
     # Generates the policy file that will be deployed as a resource using custodian
     def generate_custodian_policy(self):
