@@ -1,5 +1,4 @@
 from typing import Mapping
-import os
 
 def terraform_iam_template(config: Mapping):
     dict_template = {
