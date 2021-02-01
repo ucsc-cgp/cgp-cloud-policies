@@ -31,9 +31,7 @@ aws:
   resources:
     - "s3"
 
-  # AWS access and secret key used to deploy the IAM roles via Terraform. These credentials must be associated
-  # to a user/role with sufficient privileges to deploy IAM roles defined in the /terraform_templates/ directory
+  # AWS access and secret keys should be passed as environment variables AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY, respectively, when
+  # executing the templates. There is no need to specify keys when generating the templates.
   provider:
     region: "us-east-1"
-    shared_credentials_file: "/path/to/.aws/credentials"
-    profile: "myProfileName"
