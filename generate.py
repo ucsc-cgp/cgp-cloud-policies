@@ -5,7 +5,7 @@ from custodian_templates import config_template, policy_template
 
 
 # generates all the necessary files to deploy policies given a configuration file in the format specified in /config.yml.template
-class Generator:
+class ConfigGenerator:
     CUSTODIAN_GENERATED_DIR = "generated/custodian/"
     TERRAFORM_GENERATED_DIR = "generated/terraform/"
 

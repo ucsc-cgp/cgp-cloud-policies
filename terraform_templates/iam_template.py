@@ -13,9 +13,7 @@ def terraform_iam_template(config: Mapping):
         },
         "provider": {
             "aws": {
-                "region": config["aws"]["provider"]["region"],
-                "shared_credentials_file": config["aws"]["provider"]["shared_credentials_file"],
-                "profile": config["aws"]["provider"]["profile"],
+                "region": config["aws"]["provider"]["region"]
             }
         }
     }
