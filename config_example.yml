@@ -30,8 +30,12 @@ aws:
   resources:
     - "s3"
 
+  # Resources should be tagged with an owner
+  resource_owner: "myemail@email.com"
+
   # AWS access and secret keys should be passed as environment variables (see Terraform docs,
   # https://registry.terraform.io/providers/hashicorp/aws/latest/docs#environment-variables) when
   # executing the templates. There is no need to specify environment variables when generating the templates.
   provider:
     region: "us-east-1"
+    principal: "arn:aws:iam::ACCOUNT_ID:(user/role)/MY_USER_OR_ROLE"
