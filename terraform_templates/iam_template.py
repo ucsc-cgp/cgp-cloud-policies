@@ -8,15 +8,13 @@ def terraform_iam_template(config: Mapping) -> Mapping:
             "required_providers": {
                 "aws": {
                     "source": "hashicorp/aws",
-                    "version": "~> 3.00"
+                    "version": "3.00"
                 }
             }
         },
         "provider": {
             "aws": {
-                "access_key": config["aws"]["provider"]["access_key"],
-                "secret_key": config["aws"]["provider"]["secret_key"],
-                "region": config["aws"]["primary_region"]
+                "region": config["aws"]["provider"]["region"]
             }
         },
         "resource": [
@@ -96,7 +94,8 @@ def __iam_role_policy_attachment(config: Mapping) -> Mapping:
         "aws_iam_role_policy_attachment": {
             "attach": {
                 "role": "aws_iam_role." + config["aws"]["IAM_role_name"] + ".name",
-                "policy_arn": "aws_iam_policy." + config["aws"]["IAM_policy_name"] + ".arn"
+                "policy_arn": "aws_iam_policy." + config["aws"]["IAM_policy_name"] + ".arn",
+                "region": config["aws"]["provider"]["region"]
             }
         }
     }
