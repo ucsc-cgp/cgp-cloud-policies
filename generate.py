@@ -13,7 +13,7 @@ class ConfigGenerator:
 
         # load the config file
         with open(self.config_path) as file:
-            self.config: Mapping = yaml.load(file)
+            self.config: Mapping = yaml.load(file, Loader=yaml.FullLoader)
 
     # Generates the config file used by c7n-org, which specifies all the accounts, regions, and roles we will use to deploy policies
     def generate_custodian_config(self):
