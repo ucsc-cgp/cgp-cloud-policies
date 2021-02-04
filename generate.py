@@ -1,5 +1,9 @@
-import yaml
 from typing import Mapping
+
+import json
+import os
+import yaml
+
 from terraform_templates import iam_template
 
 
@@ -7,6 +11,7 @@ from terraform_templates import iam_template
 class ConfigGenerator:
     CUSTODIAN_GENERATED_DIR = "generated/custodian/"
     TERRAFORM_GENERATED_DIR = "generated/terraform/"
+    TERRAFORM_FILE = "generated_terraform.tf.json"
 
     def __init__(self, config_path="config.yml"):
         self.config_path = config_path  # path to the config YAML file that we will use to describe resources
@@ -25,4 +30,13 @@ class ConfigGenerator:
 
     # Generates the terraform file that will deploy the IAM roles and policies needed by custodian
     def generate_terraform(self):
-        return iam_template.terraform_iam_template(self.config)
+        generated_terraform = iam_template.terraform_iam_template(self.config)
+        filepath = os.path.join(ConfigGenerator.TERRAFORM_GENERATED_DIR, ConfigGenerator.TERRAFORM_FILE)
+        with open(filepath, "w") as outfile:
+            json.dump(generated_terraform, outfile, indent=2)
+
+
+if __name__ == "__main__":
+    G = ConfigGenerator()
+    G.generate_terraform()
+
