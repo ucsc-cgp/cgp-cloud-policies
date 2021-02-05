@@ -15,7 +15,13 @@ def terraform_iam_template(config: Mapping) -> Mapping:
                 }
             }
         },
-        "provider": [{
+        "provider":
+        [{
+            "aws": {
+                "region": config["aws"]["provider"]["region"]
+            }
+        }] +
+        [{
             "aws": {
                 "alias": account["account_name"],
                 "region": config["aws"]["provider"]["region"],
@@ -34,11 +40,11 @@ def terraform_iam_template(config: Mapping) -> Mapping:
 
 
 # Creates the IAM role that will be deployed
-def __iam_role_resource(config: Mapping, account: str) -> Mapping:
+def __iam_role_resource(config: Mapping, account_name: str) -> Mapping:
     dict_template = {
         "aws_iam_role": {
-            "provider": account,
-            config["aws"]["IAM_role_name"]: {
+            config["aws"]["IAM_role_name"] + "_" + account_name: {
+                "provider": "aws." + account_name,
                 "name": config["aws"]["IAM_role_name"],
                 "tags": {
                     "owner": config["aws"]["resource_owner"]
@@ -74,11 +80,11 @@ def __iam_role_resource(config: Mapping, account: str) -> Mapping:
 
 
 # Creates the IAM policy that will give the role permissions
-def __iam_policy_resource(config: Mapping, account: str) -> Mapping:
+def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
     dict_template = {
         "aws_iam_policy": {
-            "provider": account,
-            config["aws"]["IAM_policy_name"]: {
+            config["aws"]["IAM_policy_name"] + "_" + account_name: {
+                "provider": "aws." + account_name,
                 "name": config["aws"]["IAM_policy_name"],
                 "description": "The policy that will give the IAM role permissions to deploy custodian resources. "
                                "See https://github.com/ucsc-cgp/cgp-cloud-policies.",
@@ -102,13 +108,13 @@ def __iam_policy_resource(config: Mapping, account: str) -> Mapping:
 
 
 # Attaches the above roles and policies
-def __iam_role_policy_attachment(config: Mapping, account: str) -> Mapping:
+def __iam_role_policy_attachment(config: Mapping, account_name: str) -> Mapping:
     dict_template = {
         "aws_iam_role_policy_attachment": {
-            "provider": account,
-            "attach": {
-                "role": "${aws_iam_role." + config["aws"]["IAM_role_name"] + ".name}",
-                "policy_arn": "${aws_iam_policy." + config["aws"]["IAM_policy_name"] + ".arn}"
+            "attach_" + account_name: {
+                "provider": "aws." + account_name,
+                "role": "${aws_iam_role." + config["aws"]["IAM_role_name"] + "_" + account_name + ".name}",
+                "policy_arn": "${aws_iam_policy." + config["aws"]["IAM_policy_name"] + "_" + account_name + ".arn}"
             }
         }
     }
