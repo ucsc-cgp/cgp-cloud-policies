@@ -2,7 +2,9 @@ from typing import Mapping
 import json
 
 
-# Creates a dictionary that specifies how Terraform should deploy IAM roles and policies
+# Creates a dictionary that specifies how Terraform should deploy IAM roles and policies.
+# For each account, we will specify an AWS provider role that will be used to deploy resources.
+# The provided principal resource in config.yml must be able to assume each role in each account.
 def terraform_iam_template(config: Mapping) -> Mapping:
     dict_template = {
         "terraform": {
@@ -13,25 +15,29 @@ def terraform_iam_template(config: Mapping) -> Mapping:
                 }
             }
         },
-        "provider": {
+        "provider": [{
             "aws": {
-                "region": config["aws"]["provider"]["region"]
+                "alias": account["account_name"],
+                "region": config["aws"]["provider"]["region"],
+                "assume_role": {
+                    "role_arn": account["role"]
+                }
             }
-        },
-        "resource": [
-            __iam_role_resource(config),
-            __iam_policy_resource(config),
-            __iam_role_policy_attachment(config)
-        ]
+        } for account in config["aws"]["accounts"]],
+        "resource":
+            [__iam_role_resource(config, account["account_name"]) for account in config["aws"]["accounts"]] +
+            [__iam_policy_resource(config, account["account_name"]) for account in config["aws"]["accounts"]] +
+            [__iam_role_policy_attachment(config, account["account_name"]) for account in config["aws"]["accounts"]]
     }
 
     return dict_template
 
 
 # Creates the IAM role that will be deployed
-def __iam_role_resource(config: Mapping) -> Mapping:
+def __iam_role_resource(config: Mapping, account: str) -> Mapping:
     dict_template = {
         "aws_iam_role": {
+            "provider": account,
             config["aws"]["IAM_role_name"]: {
                 "name": config["aws"]["IAM_role_name"],
                 "tags": {
@@ -68,9 +74,10 @@ def __iam_role_resource(config: Mapping) -> Mapping:
 
 
 # Creates the IAM policy that will give the role permissions
-def __iam_policy_resource(config: Mapping) -> Mapping:
+def __iam_policy_resource(config: Mapping, account: str) -> Mapping:
     dict_template = {
         "aws_iam_policy": {
+            "provider": account,
             config["aws"]["IAM_policy_name"]: {
                 "name": config["aws"]["IAM_policy_name"],
                 "description": "The policy that will give the IAM role permissions to deploy custodian resources. "
@@ -95,9 +102,10 @@ def __iam_policy_resource(config: Mapping) -> Mapping:
 
 
 # Attaches the above roles and policies
-def __iam_role_policy_attachment(config: Mapping) -> Mapping:
+def __iam_role_policy_attachment(config: Mapping, account: str) -> Mapping:
     dict_template = {
         "aws_iam_role_policy_attachment": {
+            "provider": account,
             "attach": {
                 "role": "${aws_iam_role." + config["aws"]["IAM_role_name"] + ".name}",
                 "policy_arn": "${aws_iam_policy." + config["aws"]["IAM_policy_name"] + ".arn}"
