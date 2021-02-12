@@ -31,7 +31,7 @@ class ConfigGenerator:
     # Generates the terraform file that will deploy the IAM roles and policies needed by custodian
     def generate_terraform(self):
         generated_terraform = iam_template.terraform_iam_template(self.config)
-        filepath = os.path.join(ConfigGenerator.TERRAFORM_GENERATED_DIR, ConfigGenerator.TERRAFORM_FILE)
+        filepath = os.path.join(self.TERRAFORM_GENERATED_DIR, self.TERRAFORM_FILE)
         with open(filepath, "w") as outfile:
             json.dump(generated_terraform, outfile, indent=2)
 

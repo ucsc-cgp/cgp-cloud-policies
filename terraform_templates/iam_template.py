@@ -93,10 +93,11 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                     "Statement": [
                         {
                             "Action": [
-                                "*"
+                                "s3:ListAllMyBuckets",
+                                "s3:GetObjectTagging"
                             ],
                             "Effect": "Allow",
-                            "Resource": "*"
+                            "Resource": "arn:aws:s3:::*"
                         }
                     ]
                 })
