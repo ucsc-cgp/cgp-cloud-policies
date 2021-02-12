@@ -91,14 +91,42 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                 "policy": json.dumps({
                     "Version": "2012-10-17",
                     "Statement": [
+                        {   # required actions to deploy custodian https://github.com/cloud-custodian/cloud-custodian/issues/2291 (
+                            # slightly out-of-date)
+                            "Action": [
+                                "events:DescribeRule",
+                                "events:EnableRule",
+                                "events:ListTargetsByRule",
+                                "events:PutRule",
+                                "events:PutTargets",
+                                "iam:PassRole",
+                                "lambda:AddPermission",
+                                "lambda:CreateAlias",
+                                "lambda:CreateFunction",
+                                "lambda:GetAlias",
+                                "lambda:GetFunction",
+                                "lambda:ListTags",
+                                "lambda:UpdateAlias",
+                                "lambda:UpdateFunctionCode",
+                                "lambda:UpdateFunctionConfiguration",
+                                "config:DescribeConfigRules",
+                                "config:PutConfigRule",
+                                "config:PutEvaluations",
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:PutLogEvents"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "*"
+                        },
                         {
                             "Action": [
-                                "s3:ListAllMyBuckets",
-                                "s3:GetObjectTagging"
+                                "s3:Get*",
+                                "s3:List*"
                             ],
                             "Effect": "Allow",
                             "Resource": "arn:aws:s3:::*"
-                        }
+                        },
                     ]
                 })
             }
