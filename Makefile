@@ -12,7 +12,7 @@ package:
 
 deploy:
 	(cd generated/terraform/ && terraform apply && cd ..)
-	mkdir out/
+	mkdir -p out/
 	c7n-org run -c generated/custodian/generated_custodian_config.json -u generated/custodian/generated_custodian_policy.json -s out/
 
 destroy:
