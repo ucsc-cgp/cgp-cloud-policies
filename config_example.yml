@@ -1,13 +1,14 @@
 # All the necessary information to deploy to AWS
 aws:
-
   # The accounts we will be deploying resources to. Each account will have an IAM policy and role created, in addition
   # to an AWS config rule created in EACH region specified under aws.regions
   accounts:
     - account_name: "my-account-1"
       account_id: "1234567890"
+      role: "arn:aws:iam::ACCOUNT_ID:(user/role)/MY_USER_OR_ROLE"
     - account_name: "my-account-2"
       account_id: "0987654321"
+      role: "arn:aws:iam::ACCOUNT_ID:(user/role)/MY_USER_OR_ROLE"
 
   # These are the regions that we will be deploying resources in. Every account in aws.accounts will have policies created
   # in EACH region noted below.
@@ -31,8 +32,13 @@ aws:
   resources:
     - "s3"
 
+  # Resources should be tagged with an owner
+  resource_owner: "myemail@email.com"
+
   # AWS access and secret keys should be passed as environment variables (see Terraform docs,
   # https://registry.terraform.io/providers/hashicorp/aws/latest/docs#environment-variables) when
   # executing the templates. There is no need to specify environment variables when generating the templates.
+  # provider.principal will be a resource allowed to assume the generated IAM roles.
   provider:
     region: "us-east-1"
+    principal: "arn:aws:iam::ACCOUNT_ID:(user/role)/MY_USER_OR_ROLE"
