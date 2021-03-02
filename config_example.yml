@@ -18,11 +18,13 @@ aws:
     - "us-west-1"
     - "us-west-2"
 
-  # The role Terraform will be creating, and custodian will be assuming to deploy resources
-  IAM_role_name: "cloud_enforcer_role"
+  # The role Terraform will be creating, and custodian will be assuming to deploy resources. This is a prefix, the suffix
+  # will be the account name
+  IAM_role_prefix: "cloud_enforcer_role_"
 
-  # The policy that Terraform will be creating, and gives IAM_role_name sufficient privileges
-  IAM_policy_name: "cloud_enforcer_policy"
+  # The policy that Terraform will be creating, and gives IAM_role_name sufficient privileges. This is a prefix, the suffix
+  # will be the account name
+  IAM_policy_prefix: "cloud_enforcer_policy_"
 
   # The policy prefix for custodian resources, the suffix will be the resource type, defined in aws.resources (such as s3/ec2/ebs)
   custodian_policy_prefix: "mandatory_tag_enforcer_"

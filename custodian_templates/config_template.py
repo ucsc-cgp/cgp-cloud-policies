@@ -8,7 +8,7 @@ def custodian_organizations_config_template(config: Mapping) -> Mapping:
                 "account_id": account["account_id"],
                 "name": account["account_name"],
                 "regions": config["aws"]["regions"],
-                "role": create_role_string(account["account_id"], config["aws"]["IAM_role_name"])
+                "role": create_role_string(account["account_id"], config["aws"]["IAM_role_prefix"] + account["accountName"])
             } for account in config["aws"]["accounts"]
         ]
     }
