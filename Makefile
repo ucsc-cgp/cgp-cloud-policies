@@ -16,7 +16,7 @@ package:
 
 deploy:
 	cd generated/terraform/ && terraform apply
-	sleep 20 # If the terraform resources are used too soon after creation we may run into permission issues, wait a few seconds for creation to complete
+	sleep 20
 	c7n-org run -c generated/custodian/generated_custodian_config.json -u generated/custodian/generated_custodian_policy.json --output-dir $(S3_STATE_DIR)
 
 destroy:
