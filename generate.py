@@ -26,14 +26,14 @@ class ConfigGenerator:
     # Generates the config file used by c7n-org, which specifies all the accounts, regions, and roles we will use to deploy policies
     def generate_custodian_config(self):
         generated_cc = config_template.custodian_organizations_config_template(self.config)
-        filepath = os.path.join(ConfigGenerator.CUSTODIAN_GENERATED_DIR, ConfigGenerator.CUSTODIAN_CONFIG_FILE)
+        filepath = os.path.join(self.CUSTODIAN_GENERATED_DIR, self.CUSTODIAN_CONFIG_FILE)
         with open(filepath, "w") as outfile:
             json.dump(generated_cc, outfile, indent=2)
 
     # Generates the policy file that will be deployed as a resource using custodian
     def generate_custodian_policy(self):
         generated_cc = policy_template.custodian_policy_template(self.config)
-        filepath = os.path.join(ConfigGenerator.CUSTODIAN_GENERATED_DIR, ConfigGenerator.CUSTODIAN_POLICY_FILE)
+        filepath = os.path.join(self.CUSTODIAN_GENERATED_DIR, self.CUSTODIAN_POLICY_FILE)
         with open(filepath, "w") as outfile:
             json.dump(generated_cc, outfile, indent=2)
 
