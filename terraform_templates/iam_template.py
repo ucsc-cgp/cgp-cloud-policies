@@ -13,6 +13,13 @@ def terraform_iam_template(config: Mapping) -> Mapping:
                     "source": "hashicorp/aws",
                     "version": "3.00"
                 }
+            },
+            "backend": {
+                "s3": {
+                    "bucket": config["aws"]["remote_S3_bucket_name"],
+                    "key": config["aws"]["remote_S3_terraform_key"],
+                    "region": config["aws"]["provider"]["region"]
+                }
             }
         },
         "provider":
@@ -126,7 +133,7 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                             ],
                             "Effect": "Allow",
                             "Resource": "arn:aws:s3:::*"
-                        },
+                        }
                     ]
                 })
             }

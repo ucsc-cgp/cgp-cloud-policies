@@ -18,6 +18,13 @@ aws:
     - "us-west-1"
     - "us-west-2"
 
+  # Where Terraform's state will be remotely stored and accessed. The bucket and path need to be created in advance
+  # to deploying other resources. The bucket needs to be in the region specified under the 'provider' field. The
+  # Custodian variables will be imported into the Makefile to execute c7n-org with the correct variable inputs.
+  remote_S3_bucket_name: "my_bucket"
+  remote_S3_terraform_key: "path/to/terraform/key"
+  remote_S3_custodian_key: "path/to/custodian/key"
+
   # The role Terraform will be creating, and custodian will be assuming to deploy resources
   IAM_role_name: "cloud_enforcer_role"
 
