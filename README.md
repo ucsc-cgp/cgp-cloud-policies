@@ -37,6 +37,7 @@ which CloudCustodian can subsequently assume to perform it functionality.
 ##### Manual configuration
 * Terraform v0.14.0
 * Python 3.9.0
+* jq 1.6
 
 ```console
 $ python -m venv .venv
@@ -48,15 +49,17 @@ $ pip install -r requirements.txt
 TODO
 
 ### Common tasks
+All resource deployments and destructions will rely on your config.yml file. Make sure to populate it with the necessary resources.
+
 #####  Tearing down deployed resources
-TODO
+*Note*: don't forget to provide credentials (such as through AWS_PROFILE=... env variable)
+
+Run the command ```make destroy```
 
 ##### Adding, removing, or adjusting a policy
-TODO
+1. Update config.yml with your new information
+2. Run the command ```make package```
+3. Run the command ```make deploy```
 
 ##### Configuring c7n-mailer templates
 TODO
-
-##### Adding an account
-TODO
-
