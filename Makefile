@@ -17,9 +17,5 @@ deploy:
 	c7n-org run -c generated/custodian/generated_custodian_config.json -u generated/custodian/generated_custodian_policy.json --output-dir s3://$$S3_STATE_BUCKET/$$CUSTODIAN_PREFIX
 
 destroy:
-	if [ -f generated/custodian/generated_custodian_config.json ] && [ -f generated/custodian/generated_custodian_policy.json ] ; \
-	then \
-	  	source deployment_variables.env && \
-		c7n-org run-script --output-dir s3://$$S3_STATE_BUCKET/$$CUSTODIAN_PREFIX -c generated/custodian/generated_custodian_config.json "python3 utils/mugc.py --present -c generated/custodian/generated_custodian_policy.json"; \
-	fi;
+	bash destroyCloudCustodianResources.sh
 	cd generated/terraform/ && terraform destroy
