@@ -1,4 +1,5 @@
 from typing import Mapping
+from utils.helpers import create_remote_bucket_string, create_full_iam_resource_name
 import json
 
 
@@ -50,9 +51,9 @@ def terraform_iam_template(config: Mapping) -> Mapping:
 def __iam_role_resource(config: Mapping, account_name: str) -> Mapping:
     dict_template = {
         "aws_iam_role": {
-            config["aws"]["IAM_role_prefix"] + account_name: {
+            create_full_iam_resource_name(config["aws"]["IAM_role_prefix"], account_name): {
                 "provider": "aws." + account_name,
-                "name": config["aws"]["IAM_role_prefix"] + account_name,
+                "name": create_full_iam_resource_name(config["aws"]["IAM_role_prefix"], account_name),
                 "tags": {
                     "owner": config["aws"]["resource_owner"]
                 },
@@ -90,9 +91,9 @@ def __iam_role_resource(config: Mapping, account_name: str) -> Mapping:
 def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
     dict_template = {
         "aws_iam_policy": {
-            config["aws"]["IAM_policy_prefix"] + account_name: {
+            create_full_iam_resource_name(config["aws"]["IAM_policy_prefix"], account_name): {
                 "provider": "aws." + account_name,
-                "name": config["aws"]["IAM_policy_prefix"] + account_name,
+                "name": create_full_iam_resource_name(config["aws"]["IAM_policy_prefix"], account_name),
                 "description": "The policy that will give the IAM role permissions to deploy custodian resources. "
                                "See https://github.com/ucsc-cgp/cgp-cloud-policies.",
                 "policy": json.dumps({
@@ -139,7 +140,7 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                                 "*"
                             ],
                             "Effect": "Allow",
-                            "Resource": "arn:aws:s3:::" + config["aws"]["remote_S3_bucket_name"] + "/*"
+                            "Resource": create_remote_bucket_string(config["aws"]["remote_S3_bucket_name"])
                         }
                     ]
                 })
@@ -156,8 +157,8 @@ def __iam_role_policy_attachment(config: Mapping, account_name: str) -> Mapping:
         "aws_iam_role_policy_attachment": {
             "attach_" + account_name: {
                 "provider": "aws." + account_name,
-                "role": "${aws_iam_role." + config["aws"]["IAM_role_prefix"] + account_name + ".name}",
-                "policy_arn": "${aws_iam_policy." + config["aws"]["IAM_policy_prefix"] + account_name + ".arn}"
+                "role": "${aws_iam_role." + create_full_iam_resource_name(config["aws"]["IAM_role_prefix"], account_name) + ".name}",
+                "policy_arn": "${aws_iam_policy." + create_full_iam_resource_name(config["aws"]["IAM_policy_prefix"], account_name) + ".arn}"
             }
         }
     }

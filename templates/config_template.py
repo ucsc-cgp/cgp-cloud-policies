@@ -1,5 +1,5 @@
 from typing import Mapping
-
+from utils.helpers import create_role_string, create_full_iam_resource_name
 
 def custodian_organizations_config_template(config: Mapping) -> Mapping:
     dict_template = {
@@ -8,13 +8,9 @@ def custodian_organizations_config_template(config: Mapping) -> Mapping:
                 "account_id": account["account_id"],
                 "name": account["account_name"],
                 "regions": config["aws"]["regions"],
-                "role": create_role_string(account["account_id"], config["aws"]["IAM_role_prefix"] + account["account_name"])
+                "role": create_role_string(account["account_id"], create_full_iam_resource_name(config["aws"]["IAM_role_prefix"], account["account_name"]))
             } for account in config["aws"]["accounts"]
         ]
     }
 
     return dict_template
-
-
-def create_role_string(account_id: str, iam_role_name: str) -> str:
-    return "arn:aws:iam::" + account_id + ":role/" + iam_role_name
