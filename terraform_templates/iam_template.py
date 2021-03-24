@@ -133,6 +133,13 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                             ],
                             "Effect": "Allow",
                             "Resource": "arn:aws:s3:::*"
+                        },
+                        {
+                            "Action": [
+                                "*"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": "arn:aws:s3:::" + config["aws"]["remote_S3_bucket_name"] + "/*"
                         }
                     ]
                 })
