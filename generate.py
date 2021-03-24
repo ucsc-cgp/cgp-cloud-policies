@@ -4,9 +4,7 @@ import json
 import os
 import yaml
 
-from custodian_templates import config_template, policy_template
-from terraform_templates import iam_template
-
+from templates import config_template, policy_template, iam_template
 
 # generates all the necessary files to deploy policies given a configuration file in the format specified in /config.yml.template
 class ConfigGenerator:
