@@ -37,7 +37,6 @@ which CloudCustodian can subsequently assume to perform it functionality.
 ##### Manual configuration
 * Terraform v0.14.0
 * Python 3.9.0
-* jq 1.6
 
 ```console
 $ python -m venv .venv
@@ -45,8 +44,38 @@ $ source .venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
-### Install
-TODO
+### The full process
+```console
+# get the repository
+$ git clone https://github.com/ucsc-cgp/cgp-cloud-policies.git
+$ cd cgp-cloud_policies
+
+# setup the environment
+$ python -m venv .venv
+$ source .venv/bin/activate
+$ pip install -r requirements.txt
+
+# Create a config.yml file, copy the contents of config_example.yml into it, and fill it out
+# Then, generate the first set of files from templates
+$ make package
+
+# We have to initialize terraform locally. You'll need AWS credentials to setup the remote
+# s3 bucket.
+$ cd generated/terraform
+$ AWS_PROFILE='...' terraform init
+
+# If all goes well, terraform initialized correctly. If there was an error initializing,
+# make sure all the config info is typo-free (especially for the remote s3 bucket).
+# You may need to delete the .terraform file.
+
+# Go back to the root of the project, and run!
+$ cd ../..
+$ AWS_PROFILE='...' make deploy
+
+# Destroy the resources afterwards
+$ AWS_PROFILE='...' make destroy
+
+```
 
 ### Common tasks
 All resource deployments and destructions will rely on your config.yml file. Make sure to populate it with the necessary resources.
