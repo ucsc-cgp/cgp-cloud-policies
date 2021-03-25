@@ -44,6 +44,9 @@ $ source .venv/bin/activate
 $ pip install -r requirements.txt
 ```
 
+You will also need to set up the remote S3 bucket that you want Terraform and CloudCustodian state/log files to be store
+in. The bucket will need to have an access policy setup if you want the CloudCustodian run logs to be written.
+
 ### The full process
 ```console
 # get the repository
@@ -72,7 +75,8 @@ $ AWS_PROFILE='...' terraform init
 $ cd ../..
 $ AWS_PROFILE='...' make deploy
 
-# Destroy the resources afterwards
+# Destroy the resources afterwards. This will destroy the Terraform IAM roles, which will modify existing access
+# policies on the remote S3 bucket.
 $ AWS_PROFILE='...' make destroy
 
 ```
