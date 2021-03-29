@@ -5,6 +5,7 @@ import os
 import yaml
 
 from templates import config_template, policy_template, iam_template
+from utils.helpers import create_deployed_config_policy_resource_name
 
 # generates all the necessary files to deploy policies given a configuration file in the format specified in /config.yml.template
 class ConfigGenerator:
@@ -47,12 +48,14 @@ class ConfigGenerator:
     def generate_environment_variables(self):
         accounts_str = " ".join([a["account_name"] for a in self.config["aws"]["accounts"]])
         roles_str = " ".join([a["role"] for a in self.config["aws"]["accounts"]])
+        policies_str = " ".join([create_deployed_config_policy_resource_name(self.config["aws"]["custodian_policy_prefix"], r) for r in self.config["aws"]["resources"]])
 
         file_contents = ""
         file_contents += f'S3_STATE_BUCKET=\"{self.config["aws"]["remote_S3_bucket_name"]}\"\n'
         file_contents += f'CUSTODIAN_PREFIX=\"{self.config["aws"]["remote_S3_custodian_key"]}\"\n'
         file_contents += f'ACCOUNTS=\"{accounts_str}\"\n'
         file_contents += f'ROLES=\"{roles_str}\"\n'
+        file_contents += f'POLICIES=\"{policies_str}\"\n'
 
         with open(self.ENV_FILE, "w") as outfile:
             outfile.write(file_contents)

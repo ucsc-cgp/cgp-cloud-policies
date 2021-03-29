@@ -1,6 +1,7 @@
 from typing import Mapping
 from utils.helpers import create_role_string, create_full_iam_resource_name
 
+
 def custodian_organizations_config_template(config: Mapping) -> Mapping:
     dict_template = {
         "accounts": [

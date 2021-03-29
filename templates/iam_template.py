@@ -119,6 +119,7 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                                 "lambda:UpdateFunctionConfiguration",
                                 "config:DescribeConfigRules",
                                 "config:PutConfigRule",
+                                "config:StartConfigRulesEvaluation",
                                 "config:PutEvaluations",
                                 "logs:CreateLogGroup",
                                 "logs:CreateLogStream",
