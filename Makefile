@@ -1,6 +1,6 @@
 PYTHON = python3
 .DEFAULT_GOAL = help
-.PHONY: help package deploy destroy
+.PHONY: help package deploy destroy initial-evaluate
 
 help:
 	@echo "make package : Generates Terraform and CloudCustodian files from templates"
@@ -19,3 +19,7 @@ deploy:
 destroy:
 	bash destroyCloudCustodianResources.sh
 	cd generated/terraform/ && terraform destroy
+
+initial-evaluate:
+	source deployment_variables.env && \
+	c7n-org run-script --output-dir s3://$$S3_STATE_BUCKET/$$CUSTODIAN_PREFIX -c generated/custodian/generated_custodian_config.json "aws configservice start-config-rules-evaluation --config-rule-names $$POLICIES"
