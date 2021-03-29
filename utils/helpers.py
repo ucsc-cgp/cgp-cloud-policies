@@ -13,3 +13,8 @@ def create_remote_bucket_string(remote_bucket_name: str) -> str:
 
 def create_config_policy_resource_name(policy_prefix: str, resource_type:str) -> str:
     return policy_prefix + resource_type
+
+
+# Custodian prepends a prefix to resources.
+def create_deployed_config_policy_resource_name(policy_prefix: str, resource_type:str) -> str:
+    return "custodian-" + create_config_policy_resource_name(policy_prefix, resource_type)
