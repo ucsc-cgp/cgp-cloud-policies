@@ -75,9 +75,18 @@ $ AWS_PROFILE='...' terraform init
 $ cd ../..
 $ AWS_PROFILE='...' make deploy
 
+# Until you setup the access policy in the S3 bucket that will be storing logs, the config rules will not evaluate
+# as they will error out when attempting to write logs to a bucket. To resolve this, update the S3 access policy
+# with each of the IAM roles that were just deployed.
+
+# This will perform an initial execution of all the config policies deployed. If you choose not to run this
+# only new/modified resources will be evaluated for compliance with the rule.
+$ AWS_PROFILE='...' make initial-evaluate
+
 # Destroy the resources afterwards. This will destroy the Terraform IAM roles, which will modify existing access
 # policies on the remote S3 bucket.
-$ AWS_PROFILE='...' make destroy
+$ AWS_PROFILE='...' make destroy-custodian
+$ AWS_PROFILE='...' make destroy-terraform
 
 ```
 
