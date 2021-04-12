@@ -11,9 +11,28 @@ def custodian_policy_template(config: Mapping) -> Mapping:
                     "type": "config-rule"
                 },
                 "resource": resource,
-                "filters": [{
-                    "tag:Owner": "absent"
-                }]
+                "filters": [
+                    # Owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case insensitive)]
+                    {"or": [
+                        {
+                            "tag:Owner": "absent"
+                        },
+                        {"and": [
+                            {  # The general sequence '{content}@{content}.{content}' is not followed in the owner tag
+                                "type": "value",
+                                "key": "tag:Owner",
+                                "op": "regex",
+                                "value": "^((?!(@.*\\.)).)*$"
+                            },
+                            {  # Case insensitive match of 'shared' in the owner tag
+                                "type": "value",
+                                "key": "tag:Owner",
+                                "op": "regex",
+                                "value": "(?i)^((?!shared).)*$"
+                            }]
+                        }
+                    ]},
+                ]
             } for resource in config["aws"]["resources"]
         ]
     }
