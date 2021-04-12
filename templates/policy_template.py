@@ -1,5 +1,5 @@
 from typing import Mapping
-from utils.helpers import create_config_policy_resource_name
+from utils.helpers import create_config_policy_resource_name, owner_tag_email_regex, owner_tag_shared_regex
 
 
 def custodian_policy_template(config: Mapping) -> Mapping:
@@ -22,13 +22,13 @@ def custodian_policy_template(config: Mapping) -> Mapping:
                                 "type": "value",
                                 "key": "tag:Owner",
                                 "op": "regex",
-                                "value": "^((?!(@.*\\.)).)*$"
+                                "value": owner_tag_email_regex()
                             },
                             {  # Case insensitive match of 'shared' in the owner tag
                                 "type": "value",
                                 "key": "tag:Owner",
                                 "op": "regex",
-                                "value": "(?i)^((?!shared).)*$"
+                                "value": owner_tag_shared_regex()
                             }]
                         }
                     ]},
