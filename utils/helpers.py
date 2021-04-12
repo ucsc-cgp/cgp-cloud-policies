@@ -18,3 +18,11 @@ def create_config_policy_resource_name(policy_prefix: str, resource_type:str) ->
 # Custodian prepends a prefix to resources.
 def create_deployed_config_policy_resource_name(policy_prefix: str, resource_type:str) -> str:
     return "custodian-" + create_config_policy_resource_name(policy_prefix, resource_type)
+
+
+def owner_tag_email_regex() -> str:
+    return "^((?!(@.*\\.)).)*$"
+
+
+def owner_tag_shared_regex() -> str:
+    return "(?i)^((?!shared).)*$"

@@ -2,3 +2,4 @@ c7n==0.9.8
 c7n-mailer==0.6.7
 PyYAML==5.3.1
 c7n-org==0.6.9
+pytest==6.2.3
