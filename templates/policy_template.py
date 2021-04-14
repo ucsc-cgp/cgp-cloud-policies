@@ -1,5 +1,5 @@
 from typing import Mapping
-from utils.helpers import create_config_policy_resource_name, owner_tag_email_regex, owner_tag_shared_regex
+from utils.helpers import create_config_policy_resource_name, custodian_config_policy_dict
 
 
 def custodian_policy_template(config: Mapping) -> Mapping:
@@ -11,27 +11,12 @@ def custodian_policy_template(config: Mapping) -> Mapping:
                     "type": "config-rule"
                 },
                 "resource": resource,
-                "filters": [
-                    # Owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case insensitive)]
-                    {"or": [
-                        {
-                            "tag:Owner": "absent"
-                        },
-                        {"and": [
-                            {  # The general sequence '{content}@{content}.{content}' is not followed in the owner tag
-                                "type": "value",
-                                "key": "tag:Owner",
-                                "op": "regex",
-                                "value": owner_tag_email_regex()
-                            },
-                            {  # Case insensitive match of 'shared' in the owner tag
-                                "type": "value",
-                                "key": "tag:Owner",
-                                "op": "regex",
-                                "value": owner_tag_shared_regex()
-                            }]
-                        }
-                    ]},
+                "filters": [{"and": [
+                    # Owner/owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case
+                    # insensitive)]
+                    custodian_config_policy_dict("Owner"),
+                    custodian_config_policy_dict("owner")
+                ]}
                 ]
             } for resource in config["aws"]["resources"]
         ]
