@@ -130,8 +130,7 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                         },
                         {
                             "Action": [
-                                "s3:Get*",
-                                "s3:List*"
+                                "s3:*"
                             ],
                             "Effect": "Allow",
                             "Resource": "arn:aws:s3:::*"
