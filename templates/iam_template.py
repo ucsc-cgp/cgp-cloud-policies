@@ -121,6 +121,7 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                                 "config:PutConfigRule",
                                 "config:StartConfigRulesEvaluation",
                                 "config:PutEvaluations",
+                                "config:GetComplianceDetailsByConfigRule",
                                 "logs:CreateLogGroup",
                                 "logs:CreateLogStream",
                                 "logs:PutLogEvents"
