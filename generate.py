@@ -48,7 +48,9 @@ class ConfigGenerator:
     def generate_environment_variables(self):
         accounts_str = " ".join([a["account_name"] for a in self.config["aws"]["accounts"]])
         roles_str = " ".join([a["role"] for a in self.config["aws"]["accounts"]])
+
         policies_str = " ".join([create_deployed_config_policy_resource_name(self.config["aws"]["custodian_policy_prefix"], r) for r in self.config["aws"]["resources"]])
+        policies_str += " " + " ".join([create_deployed_config_policy_resource_name(self.config["aws"]["custodian_policy_prefix"] + "untagger_", r) for r in self.config["aws"]["resources"]])
 
         file_contents = ""
         file_contents += f'S3_STATE_BUCKET=\"{self.config["aws"]["remote_S3_bucket_name"]}\"\n'

@@ -36,6 +36,9 @@ aws:
   # The policy prefix for custodian resources, the suffix will be the resource type, defined in aws.resources (such as s3/ec2/ebs)
   custodian_policy_prefix: "mandatory_tag_enforcer_"
 
+  # This is the name of the tag that will be placed on resources to be deleted
+  custodian_marking_tag: "no_owner_tag_deletion"
+
   # The resources that the custodian policies will be watching, each resource listed below requires its own policy resource
   # until further progress is made on https://github.com/cloud-custodian/cloud-custodian/issues/1244
   resources:
