@@ -59,8 +59,8 @@ def custodian_tagger_lambda(config: Mapping, resource: str) -> Mapping:
             "type": "mark-for-op",
             "tag": config["aws"]["custodian_marking_tag"],
             "op": "delete",
-            "days": 0,
-            "hours": 1
+            "days": 7,
+            "hours": 0
         }]
     }
 
