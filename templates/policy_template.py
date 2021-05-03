@@ -38,7 +38,7 @@ def custodian_compliance_policy(config: Mapping, resource: str) -> Mapping:
 def custodian_tagger_lambda(config: Mapping, resource: str) -> Mapping:
     return {
         "name": create_config_policy_resource_name(config["aws"]["custodian_policy_prefix"] + "tagger_", resource),
-        "description": "This policy will delete resources that have been marked for deletion for a specific amount of time.",
+        "description": f"This policy will tag resources that are noncompliant with {create_config_policy_resource_name(config['aws']['custodian_policy_prefix'], resource)}.",
         "mode": {
             "type": "periodic",
             "schedule": "rate(15 minutes)"
@@ -59,8 +59,8 @@ def custodian_tagger_lambda(config: Mapping, resource: str) -> Mapping:
             "type": "mark-for-op",
             "tag": config["aws"]["custodian_marking_tag"],
             "op": "delete",
-            "days": 7,
-            "hours": 0
+            "days": 0,
+            "hours": 1
         }]
     }
 
