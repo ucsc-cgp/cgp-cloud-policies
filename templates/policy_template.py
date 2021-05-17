@@ -22,7 +22,7 @@ def custodian_compliance_policy(config: Mapping, resource: str) -> Mapping:
         "description": "This policy will mark improperly tagged resources for deletion.",
         "mode": {
             "type": "periodic",
-            "schedule": "rate(15 minutes)"
+            "schedule": "rate(1 hour)"
         },
         "resource": resource,
         "filters": [{"and": [
