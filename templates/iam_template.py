@@ -141,6 +141,25 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                                 "*"
                             ],
                             "Effect": "Allow",
+                            "Resource": [
+                                "arn:aws:ec2:*:*:volume/*",
+                                "arn:aws:ec2:*:*:snapshot/*"
+                            ]
+                        },
+                        {  # this needs to be a separate statement for all resources
+                            "Effect": "Allow",
+                            "Action": [
+                                "ec2:DescribeVolumes",
+                                "ec2:DescribeSnapshots",
+                                "ec2:DescribeImages"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Action": [
+                                "*"
+                            ],
+                            "Effect": "Allow",
                             "Resource": create_remote_bucket_string(config["aws"]["remote_S3_bucket_name"])
                         }
                     ]

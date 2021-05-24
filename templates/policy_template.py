@@ -1,5 +1,5 @@
 from typing import Mapping
-from utils.helpers import create_config_policy_resource_name, create_deployed_config_policy_resource_name, custodian_config_policy_dict
+from utils.helpers import create_config_policy_resource_name, custodian_config_policy_dict
 
 
 def custodian_policy_template(config: Mapping) -> Mapping:
@@ -73,7 +73,7 @@ def custodian_remove_marked_for_op(config: Mapping, resource: str) -> Mapping:
 
 
 def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
-    return {
+    dict = {
         "name": create_config_policy_resource_name(config["aws"]["custodian_policy_prefix"] + "deleter_", resource),
         "description": "This policy will delete resources that have been marked for deletion for a specific amount of time.",
         "mode": {
@@ -96,7 +96,11 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
             ]}
         ],
         "actions": [{
-            "type": "delete",
-            "remove-contents": True
+            "type": "delete"
         }]
     }
+
+    if resource == "s3":
+        dict["actions"][0]["remove-contents"] = True
+
+    return dict
