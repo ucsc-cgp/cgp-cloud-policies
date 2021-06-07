@@ -36,7 +36,7 @@ def custodian_compliance_policy(config: Mapping, resource: str) -> Mapping:
         "actions": [{
             "type": "mark-for-op",
             "tag": config["aws"]["custodian_marking_tag"],
-            "op": "delete",
+            "op": "terminate" if resource == "aws.ec2" else "delete",
             "days": 0,
             "hours": 1
         }]
@@ -91,12 +91,12 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
                 {
                     "type": "marked-for-op",
                     "tag": config["aws"]["custodian_marking_tag"],
-                    "op": "delete"
+                    "op": "terminate" if resource == "aws.ec2" else "delete"
                 }
             ]}
         ],
         "actions": [{
-            "type": "delete"
+            "type": "terminate" if resource == "aws.ec2" else "delete"
         }]
     }
 
@@ -104,3 +104,16 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
         dict["actions"][0]["remove-contents"] = True
 
     return dict
+
+
+def required_filters(resource: str) -> list[Mapping]:
+    filters = [
+        custodian_config_policy_dict("Owner"),
+        custodian_config_policy_dict("owner"),
+    ]
+
+    # We only want to delete available volumes, none that are in use
+    if resource == "aws.ebs":
+        filters.append({"state": "available"})
+
+    return filters

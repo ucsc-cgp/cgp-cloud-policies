@@ -129,21 +129,22 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                             "Effect": "Allow",
                             "Resource": "*"
                         },
-                        {
+                        {  # S3 resource IAM privileges
                             "Action": [
                                 "s3:*"
                             ],
                             "Effect": "Allow",
                             "Resource": "arn:aws:s3:::*"
                         },
-                        {
+                        {  # EC2 resource IAM privileges (instance, snapshot and volume)
                             "Action": [
-                                "*"
+                                "ec2:*"
                             ],
                             "Effect": "Allow",
                             "Resource": [
                                 "arn:aws:ec2:*:*:volume/*",
-                                "arn:aws:ec2:*:*:snapshot/*"
+                                "arn:aws:ec2:*:*:snapshot/*",
+                                "arn:aws:ec2:*:*:instance/*"
                             ]
                         },
                         {  # this needs to be a separate statement for all resources
@@ -151,7 +152,8 @@ def __iam_policy_resource(config: Mapping, account_name: str) -> Mapping:
                             "Action": [
                                 "ec2:DescribeVolumes",
                                 "ec2:DescribeSnapshots",
-                                "ec2:DescribeImages"
+                                "ec2:DescribeImages",
+                                "ec2:DescribeInstances"
                             ],
                             "Resource": "*"
                         },
