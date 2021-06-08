@@ -25,13 +25,11 @@ def custodian_compliance_policy(config: Mapping, resource: str) -> Mapping:
             "schedule": "rate(1 hour)"
         },
         "resource": resource,
-        "filters": [{"and": [
+        "filters": [{"and": required_filters(resource) + [
             # Owner/owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case
             # insensitive)]. Also include that the tag is not already there.
-            custodian_config_policy_dict("Owner"),
-            custodian_config_policy_dict("owner"),
             {f"tag:{config['aws']['custodian_marking_tag']}": "absent"}
-        ]}
+            ]}
         ],
         "actions": [{
             "type": "mark-for-op",
@@ -56,11 +54,9 @@ def custodian_remove_marked_for_op(config: Mapping, resource: str) -> Mapping:
             {"and": [
                 {f"tag:{config['aws']['custodian_marking_tag']}": "not-null"},
                 {"not": [
-                    {"and": [
+                    {"and": required_filters(resource) + [
                         # Owner/owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case
                         # insensitive)]
-                        custodian_config_policy_dict("Owner"),
-                        custodian_config_policy_dict("owner")
                     ]}
                 ]}
             ]}
@@ -82,12 +78,10 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
         },
         "resource": resource,
         "filters": [
-            {"and": [
+            {"and": required_filters(resource) + [
                 # *** Recheck the compliance status of a resource before performing any deletions ***
                 # Owner/owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case
                 # insensitive)]
-                custodian_config_policy_dict("Owner"),
-                custodian_config_policy_dict("owner"),
                 {
                     "type": "marked-for-op",
                     "tag": config["aws"]["custodian_marking_tag"],
@@ -106,7 +100,7 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
     return dict
 
 
-def required_filters(resource: str) -> list[Mapping]:
+def required_filters(resource: str) -> list[any]:
     filters = [
         custodian_config_policy_dict("Owner"),
         custodian_config_policy_dict("owner"),
@@ -114,6 +108,6 @@ def required_filters(resource: str) -> list[Mapping]:
 
     # We only want to delete available volumes, none that are in use
     if resource == "aws.ebs":
-        filters.append({"state": "available"})
+        filters.append({"State": "available"})
 
     return filters
