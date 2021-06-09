@@ -54,10 +54,9 @@ def custodian_remove_marked_for_op(config: Mapping, resource: str) -> Mapping:
             {"and": [
                 {f"tag:{config['aws']['custodian_marking_tag']}": "not-null"},
                 {"not": [
-                    {"and": required_filters(resource) + [
-                        # Owner/owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case
-                        # insensitive)]
-                    ]}
+                    # Owner/owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case
+                    # insensitive)]
+                    {"and": required_filters(resource) + []}
                 ]}
             ]}
         ],
@@ -78,10 +77,10 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
         },
         "resource": resource,
         "filters": [
+            # *** Recheck the compliance status of a resource before performing any deletions ***
+            # Owner/owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case
+            # insensitive)]
             {"and": required_filters(resource) + [
-                # *** Recheck the compliance status of a resource before performing any deletions ***
-                # Owner/owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case
-                # insensitive)]
                 {
                     "type": "marked-for-op",
                     "tag": config["aws"]["custodian_marking_tag"],
@@ -101,6 +100,11 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
 
 
 def required_filters(resource: str) -> list[any]:
+    # These are a set of filters that every lambda should check against. These should be part of an AND logical block.
+    # Specifically:
+    # 1. Check the owner/Owner tag of the resource
+    # 2. If the resource is an EBS volume, ensure that it is 'available' (i.e. not in-use by an instance)
+
     filters = [
         custodian_config_policy_dict("Owner"),
         custodian_config_policy_dict("owner"),
