@@ -39,8 +39,8 @@ def custodian_compliance_policy(config: Mapping, resource: str) -> Mapping:
             "type": "mark-for-op",
             "tag": config["aws"]["custodian_marking_tag"],
             "op": "terminate" if resource == "aws.ec2" else "delete",
-            "days": 0,
-            "hours": 1
+            "days": 7,
+            "hours": 0
         }]
     }
 
