@@ -14,7 +14,7 @@ def create_remote_bucket_string(remote_bucket_name: str) -> str:
 
 
 def create_config_policy_resource_name(policy_prefix: str, resource_type: str) -> str:
-    return policy_prefix + resource_type
+    return policy_prefix + resource_type.replace(".", "-")
 
 
 # Custodian prepends a prefix to resources.
