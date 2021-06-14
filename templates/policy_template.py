@@ -7,7 +7,11 @@ def custodian_policy_template(config: Mapping) -> Mapping:
     for resource in config["aws"]["resources"]:
         policies.append(custodian_compliance_policy(config, resource))
         policies.append(custodian_remove_marked_for_op(config, resource))
-        policies.append(custodian_deleter_lambda(config, resource))
+        
+        ###
+        # Comment out the below line to not add any DELETION policies to a deployment
+        ###
+        # policies.append(custodian_deleter_lambda(config, resource))
 
     dict_template = {
         "policies": policies
