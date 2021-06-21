@@ -11,7 +11,7 @@ def custodian_policy_template(config: Mapping) -> Mapping:
         ###
         # Comment out the below line to not add any DELETION policies to a deployment
         ###
-        # policies.append(custodian_deleter_lambda(config, resource))
+        policies.append(custodian_deleter_lambda(config, resource))
 
     dict_template = {
         "policies": policies
@@ -39,8 +39,8 @@ def custodian_compliance_policy(config: Mapping, resource: str) -> Mapping:
             "type": "mark-for-op",
             "tag": config["aws"]["custodian_marking_tag"],
             "op": "terminate" if resource == "aws.ec2" else "delete",
-            "days": 7,
-            "hours": 0
+            "days": 0,
+            "hours": 1
         }]
     }
 
