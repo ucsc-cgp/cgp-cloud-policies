@@ -151,10 +151,10 @@ def custodian_s3_lifecycle_policy(config: Mapping):
             "rules": [{
                 "ID": name,
                 "Status": "Enabled",
-                "Filter": {"Prefix": "/"},
+                "Filter": {"Prefix": ""},
                 "Transitions": [{
                     "Days": 1,
-                    "StorageClass": "GLACIER"
+                    "StorageClass": "INTELLIGENT_TIERING"
                 }]
             }]
         }]
