@@ -155,7 +155,13 @@ def custodian_s3_lifecycle_policy(config: Mapping):
                 "Transitions": [{
                     "Days": 1,
                     "StorageClass": "INTELLIGENT_TIERING"
-                }]
+                }],
+                "NoncurrentVersionTransitions": [
+                    {
+                        "NoncurrentDays": 30,
+                        "StorageClass": "STANDARD_IA"
+                    },
+                ],
             }]
         }]
     }
