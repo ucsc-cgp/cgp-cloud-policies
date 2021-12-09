@@ -13,10 +13,9 @@ def custodian_policy_template(config: Mapping) -> Mapping:
         ###
         policies.append(custodian_deleter_lambda(config, resource))
 
-    # Add a lifecycle policy to S3 and ensure versioning is enabled
+    # Add a lifecycle policy to S3
     if "s3" in config["aws"]["resources"]:
         policies.append(custodian_s3_lifecycle_policy(config))
-        policies.append(custodian_s3_versioning(config))
 
     dict_template = {
         "policies": policies
@@ -107,35 +106,6 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
 
     return dict
 
-
-def custodian_s3_versioning(config: Mapping):
-    name = create_config_policy_resource_name(config["aws"]["custodian_policy_prefix"] + "versioning_", "s3")
-    return {
-        "name": name,
-        "description": "This policy will turn on versioning for buckets.",
-        "mode": {
-            "type": "periodic",
-            "schedule": "rate(1 hour)"
-        },
-        "resource": "s3",
-        "filters": [
-            {"or": [{
-                "type": "value",
-                "key": "Versioning.Status",
-                "value": "Suspended"
-            }, {
-                "type": "value",
-                "key": "Versioning.Status",
-                "value": "absent"
-            }]}
-        ],
-        "actions": [{
-            "type": "toggle-versioning",
-            "enabled": True
-        }]
-    }
-
-
 def custodian_s3_lifecycle_policy(config: Mapping):
     name = create_config_policy_resource_name(config["aws"]["custodian_policy_prefix"] + "lifecycle_", "s3")
     return {
@@ -155,13 +125,7 @@ def custodian_s3_lifecycle_policy(config: Mapping):
                 "Transitions": [{
                     "Days": 1,
                     "StorageClass": "INTELLIGENT_TIERING"
-                }],
-                "NoncurrentVersionTransitions": [
-                    {
-                        "NoncurrentDays": 30,
-                        "StorageClass": "STANDARD_IA"
-                    },
-                ],
+                }]
             }]
         }]
     }
