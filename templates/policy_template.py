@@ -7,11 +7,15 @@ def custodian_policy_template(config: Mapping) -> Mapping:
     for resource in config["aws"]["resources"]:
         policies.append(custodian_compliance_policy(config, resource))
         policies.append(custodian_remove_marked_for_op(config, resource))
-        
+
         ###
         # Comment out the below line to not add any DELETION policies to a deployment
         ###
         policies.append(custodian_deleter_lambda(config, resource))
+
+    # Add a lifecycle policy to S3
+    if "s3" in config["aws"]["resources"]:
+        policies.append(custodian_s3_lifecycle_policy(config))
 
     dict_template = {
         "policies": policies
@@ -33,8 +37,8 @@ def custodian_compliance_policy(config: Mapping, resource: str) -> Mapping:
             # Owner/owner tag [is absent] or [does not look like an email address AND does not have the word 'shared' (case
             # insensitive)]. Also include that the tag is not already there.
             {f"tag:{config['aws']['custodian_marking_tag']}": "absent"}
-            ]}
-        ],
+        ]}
+                    ],
         "actions": [{
             "type": "mark-for-op",
             "tag": config["aws"]["custodian_marking_tag"],
@@ -101,6 +105,30 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
         dict["actions"][0]["remove-contents"] = True
 
     return dict
+
+def custodian_s3_lifecycle_policy(config: Mapping):
+    name = create_config_policy_resource_name(config["aws"]["custodian_policy_prefix"] + "lifecycle_", "s3")
+    return {
+        "name": name,
+        "description": "This policy will attach a lifecycle policy to S3 buckets.",
+        "mode": {
+            "type": "periodic",
+            "schedule": "rate(1 hour)"
+        },
+        "resource": "s3",
+        "actions": [{
+            "type": "configure-lifecycle",
+            "rules": [{
+                "ID": name,
+                "Status": "Enabled",
+                "Filter": {"Prefix": ""},
+                "Transitions": [{
+                    "Days": 1,
+                    "StorageClass": "INTELLIGENT_TIERING"
+                }]
+            }]
+        }]
+    }
 
 
 def required_filters(resource: str) -> list[any]:
