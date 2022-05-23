@@ -11,25 +11,15 @@ Terraform
 * Deploys IAM roles and policies that are needed to deploy and enforce CloudCustodian policies.
 
 CloudCustodian
-* While assuming a role created by Terraform, deploy policies in [AWS Config] that will manage resources.
+* While assuming a role created by Terraform, deploy policies using AWS Lambda that will manage resources.
 
 CloudCustodian allows us to deploy policies to AWS accounts. These policies are AWS resources
-that can be viewed in the AWS console (see [AWS config]). CloudCustodian policies will continuously monitor resources,
+that can be viewed under AWS Lambdas of the AWS Console. CloudCustodian policies will continuously monitor resources,
 and if specified, take actions against resources that are non-compliant. 
 
 Of course, we need to have the appropriate permissions to deploy such policies, this is where Terraform comes into play. 
 Terraform can be used to easily specify and deploy IAM roles and policies, 
 which CloudCustodian can subsequently assume to perform it functionality.
-
-## How you use it
-
-
-
-   [AWS config]: https://aws.amazon.com/config/#:~:text=AWS%20Config%20is%20a%20service,configurations%20of%20your%20AWS%20resources.&text=This%20enables%20you%20to%20simplify,change%20management%2C%20and%20operational%20troubleshooting.
-
-### Multi-account and multi-region
-
-## Usage
 
 ### Requirements
 * Docker
@@ -102,6 +92,3 @@ Run the command ```make destroy```
 1. Update config.yml with your new information
 2. Run the command ```make package```
 3. Run the command ```make deploy```
-
-##### Configuring c7n-mailer templates
-TODO
