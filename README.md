@@ -23,9 +23,6 @@ which CloudCustodian can subsequently assume to perform it functionality.
 
 ### Requirements
 * Docker
-
-##### Manual configuration
-* Terraform v0.14.0
 * Python 3.9.0
 
 ```console
