@@ -101,6 +101,11 @@ def custodian_deleter_lambda(config: Mapping, resource: str) -> Mapping:
         }]
     }
 
+  # Allow deletion of ami snapshots
+    if resource == "aws.ebs-snapshot":
+        dict['filters'].append({"type": "skip-ami-snapshots", "value": False})
+
+
     if resource == "s3":
         dict["actions"][0]["remove-contents"] = True
 
