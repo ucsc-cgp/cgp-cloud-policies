@@ -83,7 +83,12 @@ All resource deployments and destructions will rely on your config.yml file. Mak
 #####  Tearing down deployed resources
 *Note*: don't forget to provide credentials (such as through AWS_PROFILE=... env variable)
 
-Run the command ```make destroy```
+Run the command ```make destroy-custodian``` and/or ```make destroy-custodian```. Note that it is recommended to run
+```make destroy-custodian``` before updating your local source branch. CloudCustodian uses the generated policy files
+to identify and destroy what is currently deployed, so changing the generated files can cause some issues. In short:
+1. Run ```make destroy-custodian```
+2. Update `master` branch with the latest code
+3. Run `make package` -> `make deploy`
 
 ##### Adding, removing, or adjusting a policy
 1. Update config.yml with your new information
